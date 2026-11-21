@@ -8,47 +8,69 @@ jobs:
     name: Milestone 1
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "24"
-        cache: "npm"
-        cache-dependency-path: package.json
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Read grade result
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx vitest run --reporter=json --outputFile=results.json
+        continue-on-error: true
+
+      - name: Parse results
         id: grade-result
         if: always()
         run: |
-          if [ -f grading/result.json ]; then
-            echo "passed=$(node -p "require('./grading/result.json').passed")" >> $GITHUB_OUTPUT
-            echo "failed=$(node -p "require('./grading/result.json').failed")" >> $GITHUB_OUTPUT
-            echo "total=$(node -p "require('./grading/result.json').total")" >> $GITHUB_OUTPUT
-          else
-            echo "passed=0" >> $GITHUB_OUTPUT
-            echo "failed=0" >> $GITHUB_OUTPUT
-            echo "total=0" >> $GITHUB_OUTPUT
+          if [ ! -f results.json ]; then
+            echo '{"numPassedTests":0,"numFailedTests":0,"numTotalTests":0}' > results.json
           fi
+          echo "passed=$(jq '.numPassedTests // 0' results.json)" >> $GITHUB_OUTPUT
+          echo "failed=$(jq '.numFailedTests // 0' results.json)" >> $GITHUB_OUTPUT
+          echo "total=$(jq '.numTotalTests  // 0' results.json)" >> $GITHUB_OUTPUT
+
       - name: Notify Google Sheet
         if: always()
         run: |
-          curl -L -X POST "${{ secrets.SHEETS_WEBHOOK_URL }}" \
+          PASSED=${{ steps.grade-result.outputs.passed }}
+          FAILED=${{ steps.grade-result.outputs.failed }}
+          TOTAL=${{ steps.grade-result.outputs.total }}
+
+          if [ "$FAILED" -eq 0 ] && [ "$TOTAL" -gt 0 ]; then
+            STATUS="passed"
+          else
+            STATUS="failed"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg student  "${{ github.actor }}" \
+            --arg status   "$STATUS" \
+            --arg run_url  "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --argjson passed "$PASSED" \
+            --argjson failed "$FAILED" \
+            --argjson total  "$TOTAL" \
+            --arg tag      "${{ github.ref_name }}" \
+            --arg milestone "intro-part" \
+            '{
+              student:   $student,
+              status:    $status,
+              run_url:   $run_url,
+              passed:    $passed,
+              failed:    $failed,
+              total:     $total,
+              tag:       $tag,
+              milestone: $milestone
+            }')
+
+          curl -s -X POST "${{ secrets.SHEETS_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"repo\": \"${{ github.repository }}\",
-              \"student\": \"${{ github.actor }}\",
-              \"tag\": \"${{ github.ref_name }}\",
-              \"status\": \"${{ job.status }}\",
-              \"milestone\": \"intro-part\",
-              \"passed\": \"${{ steps.grade-result.outputs.passed }}\",
-              \"failed\": \"${{ steps.grade-result.outputs.failed }}\",
-              \"total\": \"${{ steps.grade-result.outputs.total }}\",
-              \"run_url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-            }" \
+            -d "$PAYLOAD" \
             -w "\nHTTP %{http_code}\n"
