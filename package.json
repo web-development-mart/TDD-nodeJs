@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "nodemon --watch src --exec tsx src/index.ts"
+    "dev": "nodemon --watch src --exec tsx src/index.ts",
+    "mart-dev": "nodemon --watch src --exec tsx src/index-solution.ts"
   },
   "keywords": [],
   "author": "",
