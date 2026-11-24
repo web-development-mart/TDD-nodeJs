@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Utils - Live Demo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ══════════════════════════════════════════════════════════
+     VIEW 1 - FORM
+══════════════════════════════════════════════════════════ -->
+    <div id="view-form" class="view active">
+      <h1>Utils - Live Demo</h1>
+      <p class="subtitle">
+        Fill in the form below and submit to see the validation results.
+      </p>
+
+      <form id="mainForm" novalidate>
+        <!-- ── 1. Email ────────────────────────────────────── -->
+        <div class="section">
+          <span class="section-label">utils.js → isValidEmail</span>
+          <span class="section-heading">Email address</span>
+          <hr />
+          <div class="field">
+            <label class="field-label" for="emailSelect"
+              >Choose an email to validate</label
+            >
+            <select id="emailSelect">
+              <option value="">- select an email -</option>
+              <optgroup label="Valid emails">
+                <option value="user@example.com">user@example.com</option>
+                <option value="alice@company.org">alice@company.org</option>
+                <option value="bob@mail.co.uk">bob@mail.co.uk</option>
+              </optgroup>
+              <optgroup label="Invalid emails">
+                <option value="userexample.com">
+                  userexample.com (missing @)
+                </option>
+                <option value="user@">user@ (missing domain)</option>
+                <option value="user @example.com">
+                  user @example.com (space)
+                </option>
+                <option value="@nodomain">
+                  @nodomain (missing local part)
+                </option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── 2. Shop hours ───────────────────────────────── -->
+        <div class="section">
+          <span class="section-label">utils.js → isShopOpen</span>
+          <span class="section-heading">Shop visit</span>
+          <hr />
+          <div class="row-2">
+            <div class="field">
+              <label class="field-label" for="daySelect">Day</label>
+              <select id="daySelect">
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="0">Sunday</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="timeSelect">Time slot</label>
+              <select id="timeSelect">
+                <option value="8">08:00 - before opening</option>
+                <option value="9" selected>09:00 - opening time</option>
+                <option value="12">12:00 - midday</option>
+                <option value="15">15:00 - afternoon</option>
+                <option value="17">17:00 - late afternoon</option>
+                <option value="18">18:00 - closing time</option>
+                <option value="20">20:00 - evening</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── 3. Orders ───────────────────────────────────── -->
+        <div class="section">
+          <span class="section-label">utils.js → validateOrders</span>
+          <span class="section-heading">Order items</span>
+          <hr />
+          <div
+            id="orderRows"
+            style="display: flex; flex-direction: column; gap: 0.6rem"
+          ></div>
+          <button type="button" class="btn-ghost" id="addOrderBtn">
+            + Add item
+          </button>
+        </div>
+
+        <button type="submit" class="btn-primary">Submit &rarr;</button>
+      </form>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+     VIEW 2 - CONFIRMATION
+══════════════════════════════════════════════════════════ -->
+    <div id="view-confirm" class="view">
+      <div class="confirm-header">
+        <h1>Submission Results</h1>
+        <p>Here is what the utility functions returned for your inputs.</p>
+      </div>
+
+      <!-- Email result -->
+      <div class="result-card">
+        <span class="section-label">isValidEmail</span>
+        <div class="result-row">
+          <div>
+            <div class="result-key">Email submitted</div>
+            <div class="result-value" id="confirm-email"></div>
+          </div>
+          <div id="confirm-email-badge"></div>
+        </div>
+      </div>
+
+      <!-- Shop result -->
+      <div class="result-card">
+        <span class="section-label">isShopOpen</span>
+        <div class="result-row">
+          <div>
+            <div class="result-key">Visit time submitted</div>
+            <div class="result-value" id="confirm-shop"></div>
+          </div>
+          <div id="confirm-shop-badge"></div>
+        </div>
+      </div>
+
+      <!-- Orders result -->
+      <div class="result-card">
+        <span class="section-label">validateOrders</span>
+        <div class="result-row" style="margin-bottom: 0.5rem">
+          <div class="result-key">Orders submitted</div>
+          <div id="confirm-orders-badge"></div>
+        </div>
+        <table class="order-summary-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="confirm-orders-body"></tbody>
+        </table>
+        <div id="confirm-orders-errors" class="error-list"></div>
+      </div>
+
+      <button class="btn-back" id="backBtn">&#8592; Back to form</button>
+    </div>
+
+    <script type="module">
+      import { isValidEmail, isShopOpen, validateOrders } from "./src/utils.js";
+
+      const MENU_ITEMS = [
+        "Burger",
+        "Fries",
+        "Pizza",
+        "Salad",
+        "Pasta",
+        "Soda",
+        "Steak",
+        "Ice Cream",
+      ];
+      const QUANTITIES = [1, 2, 3, 5, 10, 25, 51]; // 51 deliberately triggers the >50 error
+
+      // ── Order rows ────────────────────────────────────────────────────────────
+      const orderRows = document.getElementById("orderRows");
+      const addOrderBtn = document.getElementById("addOrderBtn");
+
+      function buildItemOptions(selected = "") {
+        return MENU_ITEMS.map(
+          (name) =>
+            `<option value="${name}" ${name === selected ? "selected" : ""}>${name}</option>`,
+        ).join("");
+      }
+
+      function buildQtyOptions(selected = 1) {
+        return QUANTITIES.map(
+          (q) =>
+            `<option value="${q}" ${q === selected ? "selected" : ""}>${q}${q === 51 ? " ⚠ over limit" : ""}</option>`,
+        ).join("");
+      }
+
+      function addRow(item = "Burger", qty = 1) {
+        const div = document.createElement("div");
+        div.className = "order-row";
+        div.innerHTML = `
+      <div class="field">
+        <label class="field-label">Item</label>
+        <select class="order-item">${buildItemOptions(item)}</select>
+      </div>
+      <div class="field">
+        <label class="field-label">Quantity</label>
+        <select class="order-qty">${buildQtyOptions(qty)}</select>
+      </div>
+      <button type="button" class="btn-icon remove-btn" style="margin-top:1.4rem;" title="Remove">×</button>
+    `;
+        div
+          .querySelector(".remove-btn")
+          .addEventListener("click", () => div.remove());
+        orderRows.appendChild(div);
+      }
+
+      addRow("Burger", 2);
+      addRow("Fries", 1);
+      addOrderBtn.addEventListener("click", () => addRow());
+
+      // ── Form submit → confirmation ────────────────────────────────────────────
+      const form = document.getElementById("mainForm");
+      const viewForm = document.getElementById("view-form");
+      const viewConfirm = document.getElementById("view-confirm");
+      const backBtn = document.getElementById("backBtn");
+
+      const DAYS = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        // - Email -
+        const emailVal = document.getElementById("emailSelect").value;
+        const emailOk = emailVal ? isValidEmail(emailVal) : false;
+
+        document.getElementById("confirm-email").textContent =
+          emailVal || "(none selected)";
+        document.getElementById("confirm-email-badge").innerHTML = emailVal
+          ? emailOk
+            ? `<span class="badge badge-green">✓ Valid</span>`
+            : `<span class="badge badge-red">✗ Invalid</span>`
+          : `<span class="badge badge-gray">- skipped</span>`;
+
+        // - Shop -
+        const day = Number(document.getElementById("daySelect").value);
+        const hour = Number(document.getElementById("timeSelect").value);
+        const simDate = new Date();
+        simDate.setDate(simDate.getDate() + ((day - simDate.getDay() + 7) % 7));
+        simDate.setHours(hour, 0, 0, 0);
+        const shopOk = isShopOpen(simDate);
+
+        document.getElementById("confirm-shop").textContent =
+          `${DAYS[day]} at ${String(hour).padStart(2, "0")}:00`;
+        document.getElementById("confirm-shop-badge").innerHTML = shopOk
+          ? `<span class="badge badge-green">OPEN</span>`
+          : `<span class="badge badge-red">CLOSED</span>`;
+
+        // - Orders -
+        const rows = [...orderRows.querySelectorAll(".order-row")];
+        const orders = rows.map((r) => ({
+          item: r.querySelector(".order-item").value,
+          quantity: Number(r.querySelector(".order-qty").value),
+        }));
+
+        const { valid, errors } = validateOrders(orders);
+
+        document.getElementById("confirm-orders-badge").innerHTML = valid
+          ? `<span class="badge badge-green">✓ ${orders.length} order${orders.length > 1 ? "s" : ""} valid</span>`
+          : `<span class="badge badge-red">✗ Validation failed</span>`;
+
+        const tbody = document.getElementById("confirm-orders-body");
+        tbody.innerHTML = orders
+          .map(
+            (o, i) =>
+              `<tr><td>${i + 1}</td><td>${o.item}</td><td>${o.quantity}</td></tr>`,
+          )
+          .join("");
+
+        const errContainer = document.getElementById("confirm-orders-errors");
+        errContainer.innerHTML = errors
+          .map((err) => `<div class="error-item">${err}</div>`)
+          .join("");
+
+        // - Switch view -
+        viewForm.classList.remove("active");
+        viewConfirm.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      backBtn.addEventListener("click", () => {
+        viewConfirm.classList.remove("active");
+        viewForm.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>

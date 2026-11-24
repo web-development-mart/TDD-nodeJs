@@ -1,0 +1,261 @@
+ *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0f1117;
+        color: #e2e8f0;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+
+      /* ── Views ───────────────────────────────────────────── */
+      .view {
+        display: none;
+        max-width: 680px;
+        margin: 0 auto;
+      }
+      .view.active {
+        display: block;
+      }
+
+      /* ── Typography ──────────────────────────────────────── */
+      h1 {
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: #a78bfa;
+        margin-bottom: 0.4rem;
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #475569;
+        margin-bottom: 2rem;
+      }
+
+      /* ── Cards / sections ────────────────────────────────── */
+      .section {
+        background: #1a1d27;
+        border: 1px solid #2d3148;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+      }
+
+      .section-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+      }
+      .section-heading {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #f1f5f9;
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid #2d3148;
+      }
+
+      /* ── Form controls ───────────────────────────────────── */
+      label.field-label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+
+      select {
+        width: 100%;
+        background: #0f1117;
+        border: 1px solid #2d3148;
+        border-radius: 8px;
+        color: #e2e8f0;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.9rem center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      select:focus {
+        border-color: #a78bfa;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      /* ── Order rows ──────────────────────────────────────── */
+      .order-row {
+        display: grid;
+        grid-template-columns: 1fr 110px 36px;
+        gap: 0.5rem;
+        align-items: end;
+      }
+
+      /* ── Buttons ─────────────────────────────────────────── */
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.6rem 1.1rem;
+        transition: opacity 0.15s;
+      }
+      button:hover {
+        opacity: 0.85;
+      }
+
+      .btn-primary {
+        background: #7c3aed;
+        color: #fff;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.95rem;
+      }
+      .btn-ghost {
+        background: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #334155;
+      }
+      .btn-back {
+        background: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .btn-icon {
+        background: #7f1d1d44;
+        color: #f87171;
+        padding: 0;
+        font-size: 1.1rem;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ── Confirmation page ───────────────────────────────── */
+      .confirm-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+      .confirm-header p {
+        font-size: 0.85rem;
+        color: #475569;
+        margin-top: 0.3rem;
+      }
+
+      .result-card {
+        background: #1a1d27;
+        border: 1px solid #2d3148;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .result-key {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+      .result-value {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+        font-family: monospace;
+      }
+
+      /* ── Badges ──────────────────────────────────────────── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .badge-green {
+        background: #14532d44;
+        color: #4ade80;
+        border: 1px solid #16a34a55;
+      }
+      .badge-red {
+        background: #7f1d1d44;
+        color: #f87171;
+        border: 1px solid #dc262655;
+      }
+      .badge-gray {
+        background: #1e293b;
+        color: #64748b;
+        border: 1px solid #334155;
+      }
+
+      .error-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-top: 0.25rem;
+      }
+      .error-item {
+        font-size: 0.78rem;
+        color: #f87171;
+        padding: 0.35rem 0.7rem;
+        background: #7f1d1d22;
+        border-radius: 6px;
+        border-left: 3px solid #ef4444;
+      }
+
+      .order-summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      .order-summary-table th {
+        text-align: left;
+        color: #64748b;
+        padding: 0.3rem 0.5rem;
+        border-bottom: 1px solid #2d3148;
+      }
+      .order-summary-table td {
+        color: #cbd5e1;
+        padding: 0.3rem 0.5rem;
+        font-family: monospace;
+      }
